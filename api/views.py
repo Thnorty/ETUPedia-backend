@@ -5,9 +5,6 @@ from api.models import Student, Teacher, Classroom, Lesson, LessonSection, Lesso
 
 
 # Create your views here.
-class HelloWorldApiView(APIView):
-    def get(self, request):
-        return JsonResponse({'message': 'Hello, World!'}, safe=False)
 
 
 class GetStudentsApiView(APIView):
