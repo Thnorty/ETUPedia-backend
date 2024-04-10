@@ -115,6 +115,23 @@ class GetLessonsApiView(APIView):
         return JsonResponse(response, safe=False)
 
 
+class GetLessonInfoApiView(APIView):
+    @staticmethod
+    def post(request):
+        lesson_code = request.data['lesson_code']
+        lesson = Lesson.objects.get(lesson_code=lesson_code)
+        lesson_sections = LessonSection.objects.filter(lesson_code=lesson)
+        lesson_section_students = LessonSectionStudent.objects.filter(lesson_section__in=lesson_sections)
+        lesson_name = lesson.name
+        student_count = len(lesson_section_students)
+        response = {
+            'lesson_name': lesson_name,
+            'lesson_code': lesson_code,
+            'student_count': student_count
+        }
+        return JsonResponse(response, safe=False)
+
+
 class GetLessonSectionsApiView(APIView):
     @staticmethod
     def get(request):
