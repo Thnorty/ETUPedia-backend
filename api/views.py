@@ -1,3 +1,4 @@
+import requests
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
@@ -6,6 +7,39 @@ from api.models import Student, Teacher, Classroom, Lesson, LessonSection, Lesso
 
 
 # Create your views here.
+class LoginApiView(APIView):
+    @staticmethod
+    def post(request):
+        login_url = "https://ubs.etu.edu.tr/login.aspx?lang=tr-TR"
+
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not email or not password:
+            return JsonResponse({'error': 'Email and password are required'}, status=400)
+
+        login_data = {
+            '__VIEWSTATE': '/wEPDwUKLTkzNDk1ODgzOA9kFgICAw9kFgwCCQ8PFgIeCEltYWdlVXJsBRR+L011c3RlcmlMb2dvLzYxLnBuZ2RkAhU'
+                           'PD2QWAh4MYXV0b2NvbXBsZXRlBQJvbmQCGQ8PZBYCHwEFAm9uZAInDw8WAh4HRW5hYmxlZGhkZAIrDxYCHgdWaXNpYm'
+                           'xlaGQCLQ9kFgICAQ8PFgIeBFRleHRlZGQYAQUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgIFDUltYWdlQ'
+                           'nV0dG9uVFIFDUltYWdlQnV0dG9uRU6G8CXMQsZDt5IZGuMgTsIlSy3kDg==',
+            '__EVENTVALIDATION': '/wEWBgKjkPDYBALvqPO+AgLjqJ+WBQKG87HkBgK1qbSRCwKC3IeGDOWeHvaR4DQVjutZAzChsKm4TchX',
+            'txtLogin': email,
+            'txtPassword': password,
+            'btnLogin': 'Giriş'
+        }
+
+        session = requests.Session()
+        login_response = session.post(login_url, data=login_data)
+        session.close()
+
+        if login_url == login_response.url:
+            return JsonResponse({'error': 'Invalid credentials'}, status=401)
+
+        student = Student.objects.get(mail=email)
+        return JsonResponse({'student_id': student.id}, status=200)
+
+
 class GetStudentsApiView(APIView):
     @staticmethod
     def get(request):
