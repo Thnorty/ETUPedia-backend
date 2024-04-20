@@ -1,7 +1,16 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
 # Create your models here.
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    student = models.ForeignKey('Student', models.CASCADE, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class Student(models.Model):
     id = models.TextField(primary_key=True, blank=True, null=False)
     name = models.TextField(blank=True, null=True)

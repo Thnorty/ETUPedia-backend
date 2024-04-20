@@ -1,9 +1,12 @@
 import requests
 from django.http import JsonResponse
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from api.models import Student, Teacher, Classroom, Lesson, LessonSection, LessonSectionStudent, \
-    LessonSectionClassroom, LessonSectionTeacher
+    LessonSectionClassroom, LessonSectionTeacher, Profile
 
 
 # Create your views here.
@@ -39,10 +42,18 @@ class LoginApiView(APIView):
         student = Student.objects.get(mail=email)
         if not student:
             return JsonResponse({'error': 'Student not found'}, status=404)
-        return JsonResponse({'student_id': student.id}, status=200)
+        profile = Profile.objects.get(student=student)
+        if not profile:
+            return JsonResponse({'error': 'Profile not found'}, status=404)
+
+        token, created = Token.objects.get_or_create(user=profile.user)
+        return JsonResponse({'student_id': student.id, 'token': token.key}, status=200)
 
 
 class GetStudentsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request):
         students = Student.objects.all().order_by('name')
@@ -60,6 +71,9 @@ class GetStudentsApiView(APIView):
 
 
 class GetStudentInfoApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def post(request):
         student_id = request.data['student_id']
@@ -90,6 +104,9 @@ class GetStudentInfoApiView(APIView):
 
 
 class GetTeachersApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request):
         teachers = Teacher.objects.all().order_by('name')
@@ -102,6 +119,9 @@ class GetTeachersApiView(APIView):
 
 
 class GetTeacherInfoApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def post(request):
         teacher_name = request.data['teacher_name']
@@ -127,6 +147,9 @@ class GetTeacherInfoApiView(APIView):
 
 
 class GetClassroomsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request):
         classrooms = Classroom.objects.all()
@@ -139,6 +162,9 @@ class GetClassroomsApiView(APIView):
 
 
 class GetLessonsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request):
         lessons = Lesson.objects.all()
@@ -152,6 +178,9 @@ class GetLessonsApiView(APIView):
 
 
 class GetLessonInfoApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def post(request):
         lesson_code = request.data['lesson_code']
@@ -169,6 +198,9 @@ class GetLessonInfoApiView(APIView):
 
 
 class GetLessonSectionsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request):
         lesson_sections = LessonSection.objects.all()
