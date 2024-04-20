@@ -37,6 +37,8 @@ class LoginApiView(APIView):
             return JsonResponse({'error': 'Invalid credentials'}, status=401)
 
         student = Student.objects.get(mail=email)
+        if not student:
+            return JsonResponse({'error': 'Student not found'}, status=404)
         return JsonResponse({'student_id': student.id}, status=200)
 
 
