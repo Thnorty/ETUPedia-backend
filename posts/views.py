@@ -13,12 +13,14 @@ class GetPostsApiView(APIView):
 
     @staticmethod
     def get(request):
-        posts = Post.objects.all().order_by('-timestamp')
+        posts = Post.objects.all().order_by('-created_at')
         response = []
         for post in posts:
             response.append({
-                'author': post.author.name,
+                'id': post.id,
+                'author_name': post.author.student.name + ' ' + post.author.student.surname,
+                'title': post.title,
                 'content': post.content,
-                'timestamp': post.timestamp
+                'created_at': post.created_at.strftime('%H:%M %d %B %Y')
             })
-        return JsonResponse(response, status=200)
+        return JsonResponse(response, safe=False)
