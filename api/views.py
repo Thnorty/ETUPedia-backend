@@ -186,13 +186,16 @@ class GetLessonInfoApiView(APIView):
         lesson_code = request.data['lesson_code']
         lesson = Lesson.objects.get(lesson_code=lesson_code)
         lesson_sections = LessonSection.objects.filter(lesson_code=lesson)
-        lesson_section_students = LessonSectionStudent.objects.filter(lesson_section__in=lesson_sections)
+        lesson_section_students = (LessonSectionStudent.objects.filter(lesson_section__in=lesson_sections)
+                                   .order_by('student__name', 'student__surname'))
+        students = [{'id': lss.student.id, 'name': lss.student.name, 'surname': lss.student.surname} for lss in lesson_section_students]
         lesson_name = lesson.name
         student_count = len(lesson_section_students)
         response = {
-            'lesson_name': lesson_name,
             'lesson_code': lesson_code,
-            'student_count': student_count
+            'lesson_name': lesson_name,
+            'student_count': student_count,
+            'students': students
         }
         return JsonResponse(response, safe=False)
 
