@@ -56,7 +56,7 @@ class GetStudentsApiView(APIView):
 
     @staticmethod
     def get(request):
-        students = Student.objects.all().order_by('name')
+        students = Student.objects.all().order_by('name', 'surname')
         response = []
         for student in students:
             response.append({
