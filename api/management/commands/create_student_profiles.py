@@ -8,7 +8,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         students = Student.objects.all()
-        total_students = students.count()
+        student_count = students.count()
         completed = 0
 
         for student in students:
@@ -22,7 +22,7 @@ class Command(BaseCommand):
                 Profile.objects.create(user=user, student=student)
 
                 # Print the progress
-                completed_percentage = (completed / total_students) * 100
+                completed_percentage = (completed / student_count) * 100
                 self.stdout.write(self.style.SUCCESS(f'{completed_percentage:.2f}% - Profile created for {student.name} {student.surname}'))
 
         self.stdout.write(self.style.SUCCESS('Successfully created profiles for all students'))

@@ -52,6 +52,7 @@ class Classroom(models.Model):
 class Lesson(models.Model):
     lesson_code = models.TextField(primary_key=True, blank=True, null=False)
     name = models.TextField(blank=True, null=True)
+    color = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

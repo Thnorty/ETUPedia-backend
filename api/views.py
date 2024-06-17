@@ -65,6 +65,7 @@ class GetStudentInfoApiView(APIView):
                 'lesson_code': section.lesson_section.lesson_code.lesson_code,
                 'lesson_name': section.lesson_section.lesson_code.name,
                 'lesson_section_number': section.lesson_section.lesson_section_number,
+                'color': section.lesson_section.lesson_code.color,
                 'classrooms_and_times': classrooms_and_times
             })
         response = {
