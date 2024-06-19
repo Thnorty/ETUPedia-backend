@@ -9,6 +9,7 @@ urlpatterns = [
 
     path('get-lessons/', views.GetLessonsApiView.as_view(), name='lessons'),
     path('get-lesson-info/', views.GetLessonInfoApiView.as_view(), name='lesson_info'),
+    path('get-sections-of-lesson/', views.GetSectionsOfLessonApiView.as_view(), name='sections_of_lesson'),
 
     path('get-students/', views.GetStudentsApiView.as_view(), name='students'),
     path('get-student-info/', views.GetStudentInfoApiView.as_view(), name='student_info'),

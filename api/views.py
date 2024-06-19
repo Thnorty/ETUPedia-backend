@@ -75,6 +75,7 @@ class GetStudentInfoApiView(APIView):
             'department': student.department,
             'mail': student.mail,
             'year': student.year,
+            'color': student.color,
             'lesson_sections': lesson_sections
         }
         return JsonResponse(response, safe=False)
@@ -114,6 +115,7 @@ class GetTeacherInfoApiView(APIView):
                 'lesson_code': section.lesson_section.lesson_code.lesson_code,
                 'lesson_name': section.lesson_section.lesson_code.name,
                 'lesson_section_number': section.lesson_section.lesson_section_number,
+                'color': section.lesson_section.lesson_code.color,
                 'classrooms_and_times': classrooms_and_times
             })
         response = {
@@ -163,6 +165,7 @@ class GetLessonInfoApiView(APIView):
         lesson_code = request.data['lesson_code']
         lesson = Lesson.objects.get(lesson_code=lesson_code)
         lesson_sections = LessonSection.objects.filter(lesson_code=lesson)
+        lesson_section_count = len(lesson_sections)
         lesson_section_students = (LessonSectionStudent.objects.filter(lesson_section__in=lesson_sections)
                                    .order_by('student__name', 'student__surname'))
         students = [{'id': lss.student.id, 'name': lss.student.name, 'surname': lss.student.surname} for lss in lesson_section_students]
@@ -171,9 +174,28 @@ class GetLessonInfoApiView(APIView):
         response = {
             'lesson_code': lesson_code,
             'lesson_name': lesson_name,
+            'lesson_section_count': lesson_section_count,
             'student_count': student_count,
             'students': students
         }
+        return JsonResponse(response, safe=False)
+
+
+class GetSectionsOfLessonApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        lesson_code = request.data['lesson_code']
+        lesson = Lesson.objects.get(lesson_code=lesson_code)
+        lesson_sections = LessonSection.objects.filter(lesson_code=lesson)
+        response = []
+        for lesson_section in lesson_sections:
+            response.append({
+                'section_teacher': lesson_section.lessonsectionteacher_set.first().teacher_name.name,
+                'section_number': lesson_section.lesson_section_number
+            })
         return JsonResponse(response, safe=False)
 
 

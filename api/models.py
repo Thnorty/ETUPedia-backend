@@ -18,6 +18,7 @@ class Student(models.Model):
     department = models.TextField(blank=True, null=True)
     mail = models.TextField(blank=True, null=True)
     year = models.IntegerField(blank=True, null=True)
+    color = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
