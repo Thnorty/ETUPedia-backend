@@ -41,7 +41,8 @@ class GetStudentsApiView(APIView):
                 'surname': student.surname,
                 'department': student.department,
                 'mail': student.mail,
-                'year': student.year
+                'year': student.year,
+                'color': student.color
             })
         return JsonResponse(response, safe=False)
 
@@ -79,6 +80,20 @@ class GetStudentInfoApiView(APIView):
             'lesson_sections': lesson_sections
         }
         return JsonResponse(response, safe=False)
+
+
+class ChangeProfileColorApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        student_id = request.data['student_id']
+        color = request.data['color']
+        student = Student.objects.get(id=student_id)
+        student.color = color
+        student.save()
+        return JsonResponse({'message': 'Color changed successfully'}, status=200)
 
 
 class GetTeachersApiView(APIView):
@@ -168,7 +183,7 @@ class GetLessonInfoApiView(APIView):
         lesson_section_count = len(lesson_sections)
         lesson_section_students = (LessonSectionStudent.objects.filter(lesson_section__in=lesson_sections)
                                    .order_by('student__name', 'student__surname'))
-        students = [{'id': lss.student.id, 'name': lss.student.name, 'surname': lss.student.surname} for lss in lesson_section_students]
+        students = [{'id': lss.student.id, 'name': lss.student.name, 'surname': lss.student.surname, 'color': lss.student.color} for lss in lesson_section_students]
         lesson_name = lesson.name
         student_count = len(lesson_section_students)
         response = {
