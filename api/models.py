@@ -8,7 +8,7 @@ class Profile(models.Model):
     student = models.ForeignKey('Student', models.CASCADE, blank=True, null=True)
 
     def __str__(self):
-        return self.user.username
+        return self.student.name + " " + self.student.surname
 
 
 class Student(models.Model):

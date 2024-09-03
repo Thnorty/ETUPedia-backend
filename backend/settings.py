@@ -31,12 +31,13 @@ CORS_ALLOW_HEADERS = ['*']
 
 ALLOWED_HOSTS = ['.ngrok-free.app', 'localhost']
 
-CSRF_TRUSTED_ORIGINS = ['https://bass-flexible-freely.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://bass-flexible-freely.ngrok-free.app', 'https://flexible-rabbit-jolly.ngrok-free.app']
 
 # Application definition
 
 INSTALLED_APPS = [
     'corsheaders',
+    'adminsortable2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
