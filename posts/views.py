@@ -23,7 +23,7 @@ class GetPostsApiView(APIView):
                 'topic': post.topic.name,
                 'author_name': post.author.student.name + ' ' + post.author.student.surname,
                 'title': post.title,
-                'content': post.content,
+                'content': f'{post.content[:100]}...' if len(post.content) > 100 else post.content,
                 'created_at': created_at,
                 'likes': post.likes.count(),
                 'liked': post.likes.filter(id=request.user.profile.id).exists()
@@ -81,7 +81,7 @@ class GetPostInfoApiView(APIView):
             'likes': post.likes.count(),
             'liked': post.likes.filter(id=request.user.profile.id).exists()
         }
-        comments = post.postcomment_set.all().order_by('created_at')
+        comments = post.postcomment_set.all().order_by('-created_at')
         response_comments = []
         for comment in comments:
             created_at = comment.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
