@@ -14,12 +14,33 @@ class LoginApiView(APIView):
     @staticmethod
     def post(request):
         email = request.data.get('email')
+        password = request.data.get('password')
 
-        student = Student.objects.get(mail=email)
-        if not student:
+        if not email or not password:
+            return JsonResponse({'error': 'Email and password are required'}, status=400)
+
+        login_url = "https://ubs.etu.edu.tr/login.aspx?lang=tr-TR"
+        login_data = {
+          '__VIEWSTATE': '/wEPDwUKLTkzNDk1ODgzOA9kFgICAw9kFgwCCQ8PFgIeCEltYWdlVXJsBRR+L011c3RlcmlMb2dvLzYxLnBuZ2RkAhU' +
+                          'PD2QWAh4MYXV0b2NvbXBsZXRlBQJvbmQCGQ8PZBYCHwEFAm9uZAInDw8WAh4HRW5hYmxlZGhkZAIrDxYCHgdWaXNpYm' +
+                          'xlaGQCLQ9kFgICAQ8PFgIeBFRleHRlZGQYAQUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgIFDUltYWdlQ' +
+                          'nV0dG9uVFIFDUltYWdlQnV0dG9uRU6G8CXMQsZDt5IZGuMgTsIlSy3kDg==',
+          '__EVENTVALIDATION': '/wEWBgKjkPDYBALvqPO+AgLjqJ+WBQKG87HkBgK1qbSRCwKC3IeGDOWeHvaR4DQVjutZAzChsKm4TchX',
+          'txtLogin': email,
+          'txtPassword': password,
+          'btnLogin': 'Giriş'
+        }
+
+        response = requests.post(login_url, data=login_data)
+        if response.url == login_url:
+            return JsonResponse({'error': 'Invalid credentials'}, status=400)
+
+        try:
+            student = Student.objects.get(mail=email)
+            profile = Profile.objects.get(student=student)
+        except Student.DoesNotExist:
             return JsonResponse({'error': 'Student not found'}, status=404)
-        profile = Profile.objects.get(student=student)
-        if not profile:
+        except Profile.DoesNotExist:
             return JsonResponse({'error': 'Profile not found'}, status=404)
 
         token, created = Token.objects.get_or_create(user=profile.user)
