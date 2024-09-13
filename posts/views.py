@@ -20,7 +20,11 @@ class GetPostsApiView(APIView):
             created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
             response.append({
                 'id': post.id,
-                'topic': post.topic.name,
+                'is_owner': post.author == request.user.profile,
+                'topic': {
+                    'name': post.topic.name,
+                    'order': post.topic.order
+                },
                 'author_name': post.author.student.name + ' ' + post.author.student.surname,
                 'title': post.title,
                 'content': f'{post.content[:100]}...' if len(post.content) > 100 else post.content,
@@ -45,6 +49,38 @@ class CreatePostApiView(APIView):
         post = Post.objects.create(author=author, topic=topic, title=title, content=content)
         post.save()
         return JsonResponse({'message': 'Post created successfully'}, status=201)
+
+
+class EditPostApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        post_id = request.data.get('post_id')
+        post = Post.objects.get(id=post_id)
+        if post.author != request.user.profile:
+            return JsonResponse({'message': 'You are not the owner of this post'}, status=403)
+        topic_order = request.data.get('topic_order')
+        post.topic = Topic.objects.get(order=topic_order)
+        post.title = request.data.get('title')
+        post.content = request.data.get('content')
+        post.save()
+        return JsonResponse({'message': 'Post edited successfully'}, status=200)
+
+
+class DeletePostApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        post_id = request.data.get('post_id')
+        post = Post.objects.get(id=post_id)
+        if post.author != request.user.profile:
+            return JsonResponse({'message': 'You are not the owner of this post'}, status=403)
+        post.delete()
+        return JsonResponse({'message': 'Post deleted successfully'}, status=200)
 
 
 class CreateCommentApiView(APIView):
@@ -73,7 +109,11 @@ class GetPostInfoApiView(APIView):
         created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
         response_post = {
             'id': post.id,
-            'topic': post.topic.name,
+            'is_owner': post.author == request.user.profile,
+            'topic': {
+                'name': post.topic.name,
+                'order': post.topic.order
+            },
             'author_name': post.author.student.name + ' ' + post.author.student.surname,
             'title': post.title,
             'content': post.content,
