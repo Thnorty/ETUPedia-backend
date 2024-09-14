@@ -98,6 +98,35 @@ class CreateCommentApiView(APIView):
         return JsonResponse({'message': 'Comment created successfully'}, status=201)
 
 
+class EditCommentApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        comment_id = request.data.get('comment_id')
+        comment = PostComment.objects.get(id=comment_id)
+        if comment.author != request.user.profile:
+            return JsonResponse({'message': 'You are not the owner of this comment'}, status=403)
+        comment.content = request.data.get('content')
+        comment.save()
+        return JsonResponse({'message': 'Comment edited successfully'}, status=200)
+
+
+class DeleteCommentApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        comment_id = request.data.get('comment_id')
+        comment = PostComment.objects.get(id=comment_id)
+        if comment.author != request.user.profile:
+            return JsonResponse({'message': 'You are not the owner of this comment'}, status=403)
+        comment.delete()
+        return JsonResponse({'message': 'Comment deleted successfully'}, status=200)
+
+
 class GetPostInfoApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -127,6 +156,7 @@ class GetPostInfoApiView(APIView):
             created_at = comment.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
             response_comments.append({
                 'id': comment.id,
+                'is_owner': comment.author == request.user.profile,
                 'author_name': comment.author.student.name + ' ' + comment.author.student.surname,
                 'content': comment.content,
                 'created_at': created_at,
