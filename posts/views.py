@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -17,7 +18,8 @@ class GetPostsApiView(APIView):
         posts = Post.objects.all().order_by('-created_at')
         response = []
         for post in posts:
-            created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
+            created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y')
+            edited_at = post.edited_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y') if post.edited_at else None
             response.append({
                 'id': post.id,
                 'is_owner': post.author == request.user.profile,
@@ -29,6 +31,7 @@ class GetPostsApiView(APIView):
                 'title': post.title,
                 'content': f'{post.content[:100]}...' if len(post.content) > 100 else post.content,
                 'created_at': created_at,
+                'edited_at': edited_at,
                 'likes': post.likes.count(),
                 'liked': post.likes.filter(id=request.user.profile.id).exists()
             })
@@ -65,6 +68,7 @@ class EditPostApiView(APIView):
         post.topic = Topic.objects.get(order=topic_order)
         post.title = request.data.get('title')
         post.content = request.data.get('content')
+        post.edited_at = timezone.now()
         post.save()
         return JsonResponse({'message': 'Post edited successfully'}, status=200)
 
@@ -109,6 +113,7 @@ class EditCommentApiView(APIView):
         if comment.author != request.user.profile:
             return JsonResponse({'message': 'You are not the owner of this comment'}, status=403)
         comment.content = request.data.get('content')
+        comment.edited_at = timezone.now()
         comment.save()
         return JsonResponse({'message': 'Comment edited successfully'}, status=200)
 
@@ -135,7 +140,8 @@ class GetPostInfoApiView(APIView):
     def post(request):
         post_id = request.data.get('forum_id')
         post = Post.objects.get(id=post_id)
-        created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
+        created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y')
+        edited_at = post.edited_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y') if post.edited_at else None
         response_post = {
             'id': post.id,
             'is_owner': post.author == request.user.profile,
@@ -147,19 +153,22 @@ class GetPostInfoApiView(APIView):
             'title': post.title,
             'content': post.content,
             'created_at': created_at,
+            'edited_at': edited_at,
             'likes': post.likes.count(),
             'liked': post.likes.filter(id=request.user.profile.id).exists()
         }
         comments = post.postcomment_set.all().order_by('-created_at')
         response_comments = []
         for comment in comments:
-            created_at = comment.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d %B %Y')
+            created_at = comment.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y')
+            edited_at = comment.edited_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y') if comment.edited_at else None
             response_comments.append({
                 'id': comment.id,
                 'is_owner': comment.author == request.user.profile,
                 'author_name': comment.author.student.name + ' ' + comment.author.student.surname,
                 'content': comment.content,
                 'created_at': created_at,
+                'edited_at': edited_at,
                 'likes': comment.likes.count(),
                 'liked': comment.likes.filter(id=request.user.profile.id).exists()
             })

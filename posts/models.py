@@ -10,6 +10,7 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
     likes = models.ManyToManyField(Profile, related_name='likes', blank=True)
 
     class Meta:
@@ -27,6 +28,7 @@ class PostComment(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
     likes = models.ManyToManyField(Profile, related_name='comment_likes', blank=True)
 
     class Meta:
