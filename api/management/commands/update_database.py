@@ -37,6 +37,15 @@ def update_database():
     cursor.execute('DELETE FROM classroom')
     cursor.execute('DELETE FROM teacher')
 
+    # Reset primary keys
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section_classroom"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section_student"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section_teacher"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "classroom"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "teacher"')
+
     # Get all student IDs before inserting new data
     cursor.execute('SELECT id FROM student')
     all_student_ids = {row[0] for row in cursor.fetchall()}
@@ -69,11 +78,12 @@ def update_database():
                     cursor.execute('INSERT INTO lesson_section_student (lesson_section_id, student_id) VALUES (?, ?)',
                                    (current_lesson_section_id, student['OgrenciNo']))
                     all_student_ids.discard(student['OgrenciNo'])
-                    section['OgretimUyesi'] = section['OgretimUyesi'].title()
-                    cursor.execute('INSERT OR REPLACE INTO teacher (name) VALUES (?)',
-                                   (section['OgretimUyesi'],))
-                    cursor.execute('INSERT INTO lesson_section_teacher (lesson_section_id, teacher_name) VALUES (?, ?)',
-                                   (current_lesson_section_id, section['OgretimUyesi']))
+
+                section['OgretimUyesi'] = section['OgretimUyesi'].title()
+                cursor.execute('INSERT OR IGNORE INTO teacher (name) VALUES (?)',
+                               (section['OgretimUyesi'],))
+                cursor.execute('INSERT INTO lesson_section_teacher (lesson_section_id, teacher_name) VALUES (?, ?)',
+                               (current_lesson_section_id, section['OgretimUyesi']))
 
     classroom_files = os.listdir(CLASSROOMS_FOLDER_PATH)
 
@@ -89,10 +99,10 @@ def update_database():
                     day_time = day['Gun'] - 1
                     time = hour_time * 7 + day_time
                     if day['DersKodu'] != '-':
-                        lesson = day['DersKodu'].split(' Şube')
-                        lesson_code = lesson[0]
-                        lesson_section_number = lesson[1]
-                        cursor.execute('INSERT OR REPLACE INTO lesson_section (lesson_section_number, lesson_code) VALUES (?, ?)',
+                        s = day['DersKodu'].split(' Şube')
+                        lesson_code = s[0]
+                        lesson_section_number = s[1]
+                        cursor.execute('INSERT OR IGNORE INTO lesson_section (lesson_section_number, lesson_code) VALUES (?, ?)',
                                        (lesson_section_number, lesson_code))
                         cursor.execute('SELECT id FROM lesson_section WHERE lesson_section_number = ? AND lesson_code = ?',
                                        (lesson_section_number, lesson_code))
