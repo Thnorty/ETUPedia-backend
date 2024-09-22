@@ -1,3 +1,5 @@
+import math
+from datetime import datetime, tzinfo
 from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
@@ -13,9 +15,34 @@ class GetPostsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    epoch = datetime(1970, 1, 1, tzinfo=pytz.UTC)
+
     @staticmethod
-    def get(request):
-        posts = Post.objects.all().order_by('-created_at')
+    def epoch_seconds(date):
+        td = date - GetPostsApiView.epoch
+        return td.days * 86400 + td.seconds + (float(td.microseconds) / 1000000)
+
+    @staticmethod
+    def hot_score(post):
+        score = post.like_count()
+        order = math.log(max(abs(score), 1), 10)
+        sign = 1 if score > 0 else -1 if score < 0 else 0
+        seconds = GetPostsApiView.epoch_seconds(post.created_at) - 1134028003
+        return round(sign * order + seconds / 45000, 7)
+
+    @staticmethod
+    def post(request):
+        sort_by = request.data.get('sort_by')
+        posts = Post.objects.all()
+        if sort_by == 'new':
+            posts = posts.order_by('-created_at')
+        elif sort_by == 'hot':
+            posts = sorted(posts, key=GetPostsApiView.hot_score, reverse=True)
+        elif sort_by == 'top':
+            posts = posts.order_by('-likes', '-created_at')
+        else:
+            posts = posts.order_by('-created_at')
+
         response = []
         for post in posts:
             created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y')
