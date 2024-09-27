@@ -14,34 +14,24 @@ class LoginApiView(APIView):
     @staticmethod
     def post(request):
         email = request.data.get('email')
-        password = request.data.get('password')
+        oturum_no = request.data.get('oturumNo')
 
-        if not email or not password:
+        if not email or not oturum_no:
             return JsonResponse({'error': 'Email and password are required'}, status=400)
 
-        login_url = "https://ubs.etu.edu.tr/login.aspx?lang=tr-TR"
-        login_data = {
-          '__VIEWSTATE': '/wEPDwUKLTkzNDk1ODgzOA9kFgICAw9kFgwCCQ8PFgIeCEltYWdlVXJsBRR+L011c3RlcmlMb2dvLzYxLnBuZ2RkAhU' +
-                          'PD2QWAh4MYXV0b2NvbXBsZXRlBQJvbmQCGQ8PZBYCHwEFAm9uZAInDw8WAh4HRW5hYmxlZGhkZAIrDxYCHgdWaXNpYm' +
-                          'xlaGQCLQ9kFgICAQ8PFgIeBFRleHRlZGQYAQUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgIFDUltYWdlQ' +
-                          'nV0dG9uVFIFDUltYWdlQnV0dG9uRU6G8CXMQsZDt5IZGuMgTsIlSy3kDg==',
-          '__EVENTVALIDATION': '/wEWBgKjkPDYBALvqPO+AgLjqJ+WBQKG87HkBgK1qbSRCwKC3IeGDOWeHvaR4DQVjutZAzChsKm4TchX',
-          'txtLogin': email,
-          'txtPassword': password,
-          'btnLogin': 'Giriş'
-        }
+        test_url = "https://program.etu.edu.tr/DersProgrami/api/dersprogramplan/bosderslik?dil=tr&oturumNo=" + oturum_no
 
-        response = requests.post(login_url, data=login_data)
-        if response.url == login_url:
-            return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        response = requests.get(test_url)
+        if response.status_code != 200:
+            return JsonResponse({'error': 'Wrong email or password'}, status=400)
 
         try:
             student = Student.objects.get(mail=email)
             profile = Profile.objects.get(student=student)
         except Student.DoesNotExist:
-            return JsonResponse({'error': 'Student not found'}, status=404)
+            return JsonResponse({'error': 'Student not found'}, status=400)
         except Profile.DoesNotExist:
-            return JsonResponse({'error': 'Profile not found'}, status=404)
+            return JsonResponse({'error': 'Profile not found'}, status=400)
 
         token, created = Token.objects.get_or_create(user=profile.user)
         return JsonResponse({'student_id': student.id, 'token': token.key}, status=200)
