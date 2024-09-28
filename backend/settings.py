@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'backend.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -133,3 +134,45 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'filters': {
+        'add_timestamp': {
+            '()': 'backend.logging.AddTimestamp',
+        },
+        'add_severity': {
+            '()': 'backend.logging.AddSeverity',
+        },
+    },
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'json_ensure_ascii': False,
+            'json_encoder': None,
+            'format': '%(timestamp)s %(severity)s %(user)s %(endpoint)s %(payload)s %(message)',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'audit.log',
+            'formatter': 'json',
+            'filters': ['add_timestamp', 'add_severity'],
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.server': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}

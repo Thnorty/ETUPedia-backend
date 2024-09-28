@@ -11,6 +11,8 @@ urlpatterns = [
     path('delete-comment/', views.DeleteCommentApiView.as_view(), name='delete-comment'),
     path('get-post-info/', views.GetPostInfoApiView.as_view(), name='post-info'),
     path('like-post/', views.LikePostApiView.as_view(), name='like-post'),
+    path('dislike-post/', views.DislikePostApiView.as_view(), name='dislike-post'),
     path('like-comment/', views.LikeCommentApiView.as_view(), name='like-comment'),
+    path('dislike-comment/', views.DislikeCommentApiView.as_view(), name='dislike-comment'),
     path('get-topics/', views.GetTopicsApiView.as_view(), name='topics'),
 ]

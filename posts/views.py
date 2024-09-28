@@ -1,5 +1,5 @@
 import math
-from datetime import datetime, tzinfo
+from datetime import datetime
 from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 import pytz
 
+from backend.logging_utils import log
 from posts.models import Post, Topic, PostComment
 
 
@@ -90,6 +91,7 @@ class EditPostApiView(APIView):
         post_id = request.data.get('post_id')
         post = Post.objects.get(id=post_id)
         if post.author != request.user.profile:
+            log(level='error', message='Not owner of the post', request=request)
             return JsonResponse({'message': 'You are not the owner of this post'}, status=403)
         topic_order = request.data.get('topic_order')
         post.topic = Topic.objects.get(order=topic_order)
@@ -109,6 +111,7 @@ class DeletePostApiView(APIView):
         post_id = request.data.get('post_id')
         post = Post.objects.get(id=post_id)
         if post.author != request.user.profile:
+            log(level='error', message='Not owner of the post', request=request)
             return JsonResponse({'message': 'You are not the owner of this post'}, status=403)
         post.delete()
         return JsonResponse({'message': 'Post deleted successfully'}, status=200)
@@ -121,7 +124,7 @@ class CreateCommentApiView(APIView):
     @staticmethod
     def post(request):
         author = request.user.profile
-        post_id = request.data.get('forum_id')
+        post_id = request.data.get('post_id')
         content = request.data.get('content')
         post = Post.objects.get(id=post_id)
         comment = PostComment.objects.create(author=author, post=post, content=content)
@@ -138,6 +141,7 @@ class EditCommentApiView(APIView):
         comment_id = request.data.get('comment_id')
         comment = PostComment.objects.get(id=comment_id)
         if comment.author != request.user.profile:
+            log(level='error', message='Not owner of the comment', request=request)
             return JsonResponse({'message': 'You are not the owner of this comment'}, status=403)
         comment.content = request.data.get('content')
         comment.edited_at = timezone.now()
@@ -154,6 +158,7 @@ class DeleteCommentApiView(APIView):
         comment_id = request.data.get('comment_id')
         comment = PostComment.objects.get(id=comment_id)
         if comment.author != request.user.profile:
+            log(level='error', message='Not owner of the comment', request=request)
             return JsonResponse({'message': 'You are not the owner of this comment'}, status=403)
         comment.delete()
         return JsonResponse({'message': 'Comment deleted successfully'}, status=200)
@@ -165,7 +170,7 @@ class GetPostInfoApiView(APIView):
 
     @staticmethod
     def post(request):
-        post_id = request.data.get('forum_id')
+        post_id = request.data.get('post_id')
         post = Post.objects.get(id=post_id)
         created_at = post.created_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y')
         edited_at = post.edited_at.astimezone(pytz.timezone('Europe/Istanbul')).strftime('%H:%M %d.%m.%Y') if post.edited_at else None
@@ -212,14 +217,28 @@ class LikePostApiView(APIView):
 
     @staticmethod
     def post(request):
-        post_id = request.data.get('forum_id')
+        post_id = request.data.get('post_id')
+        post = Post.objects.get(id=post_id)
+        profile = request.user.profile
+        if post.likes.filter(id=profile.id).exists():
+            return JsonResponse({'message': 'Post is already liked'}, status=400)
+        post.likes.add(profile)
+        return JsonResponse({'message': 'Post liked successfully'}, status=200)
+
+
+class DislikePostApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        post_id = request.data.get('post_id')
         post = Post.objects.get(id=post_id)
         profile = request.user.profile
         if post.likes.filter(id=profile.id).exists():
             post.likes.remove(profile)
             return JsonResponse({'message': 'Post unliked successfully'}, status=200)
-        post.likes.add(profile)
-        return JsonResponse({'message': 'Post liked successfully'}, status=200)
+        return JsonResponse({'message': 'Post is not liked'}, status=400)
 
 
 class LikeCommentApiView(APIView):
@@ -232,10 +251,24 @@ class LikeCommentApiView(APIView):
         comment = PostComment.objects.get(id=comment_id)
         profile = request.user.profile
         if comment.likes.filter(id=profile.id).exists():
-            comment.likes.remove(profile)
-            return JsonResponse({'message': 'Comment unliked successfully'}, status=200)
+            return JsonResponse({'message': 'Comment is already liked'}, status=400)
         comment.likes.add(profile)
         return JsonResponse({'message': 'Comment liked successfully'}, status=200)
+
+
+class DislikeCommentApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        comment_id = request.data.get('comment_id')
+        comment = PostComment.objects.get(id=comment_id)
+        profile = request.user.profile
+        if comment.likes.filter(id=profile.id).exists():
+            comment.likes.remove(profile)
+            return JsonResponse({'message': 'Comment unliked successfully'}, status=200)
+        return JsonResponse({'message': 'Comment is not liked'}, status=400)
 
 
 class GetTopicsApiView(APIView):

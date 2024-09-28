@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from backend.logging_utils import log
 from api.models import Student, Teacher, Classroom, Lesson, LessonSection, LessonSectionStudent, \
     LessonSectionClassroom, LessonSectionTeacher, Profile
 
@@ -17,20 +18,24 @@ class LoginApiView(APIView):
         oturum_no = request.data.get('oturumNo')
 
         if not email or not oturum_no:
+            log(level='error', message='Missing email or oturumNo', request=request)
             return JsonResponse({'error': 'Email and password are required'}, status=400)
 
         test_url = "https://program.etu.edu.tr/DersProgrami/api/dersprogramplan/bosderslik?dil=tr&oturumNo=" + oturum_no
 
         response = requests.get(test_url)
         if response.status_code != 200:
+            log(level='error', message='Invalid email or oturumNo', request=request)
             return JsonResponse({'error': 'Wrong email or password'}, status=400)
 
         try:
             student = Student.objects.get(mail=email)
             profile = Profile.objects.get(student=student)
         except Student.DoesNotExist:
+            log(level='error', message='Student not found', request=request)
             return JsonResponse({'error': 'Student not found'}, status=400)
         except Profile.DoesNotExist:
+            log(level='error', message='Profile not found', request=request)
             return JsonResponse({'error': 'Profile not found'}, status=400)
 
         token, created = Token.objects.get_or_create(user=profile.user)
