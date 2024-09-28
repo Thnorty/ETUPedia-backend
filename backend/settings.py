@@ -151,7 +151,7 @@ LOGGING = {
             '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
             'json_ensure_ascii': False,
             'json_encoder': None,
-            'format': '%(timestamp)s %(severity)s %(user)s %(endpoint)s %(payload)s %(message)',
+            'format': '%(timestamp)s %(severity)s %(user)s %(endpoint)s %(payload)s %(message)s',
         },
     },
     'handlers': {
