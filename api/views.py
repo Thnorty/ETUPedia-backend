@@ -29,6 +29,8 @@ class LoginApiView(APIView):
             return JsonResponse({'error': 'Wrong email or password'}, status=400)
 
         try:
+            if '@' not in email:
+                email = email + '@etu.edu.tr'
             student = Student.objects.get(mail=email)
             profile = Profile.objects.get(student=student)
         except Student.DoesNotExist:
@@ -104,9 +106,8 @@ class ChangeProfileColorApiView(APIView):
 
     @staticmethod
     def post(request):
-        student_id = request.data['student_id']
+        student = request.user.profile.student
         color = request.data['color']
-        student = Student.objects.get(id=student_id)
         student.color = color
         student.save()
         return JsonResponse({'message': 'Color changed successfully'}, status=200)
