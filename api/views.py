@@ -200,7 +200,13 @@ class GetLessonInfoApiView(APIView):
         lesson_section_count = len(lesson_sections)
         lesson_section_students = (LessonSectionStudent.objects.filter(lesson_section__in=lesson_sections)
                                    .order_by('student__name', 'student__surname'))
-        students = [{'id': lss.student.id, 'name': lss.student.name, 'surname': lss.student.surname, 'color': lss.student.color} for lss in lesson_section_students]
+        students = [{
+            'id': lss.student.id,
+            'name': lss.student.name,
+            'surname': lss.student.surname,
+            'color': lss.student.color,
+            'lesson_section_number': lss.lesson_section.lesson_section_number
+        } for lss in lesson_section_students]
         lesson_name = lesson.name
         student_count = len(lesson_section_students)
         response = {
