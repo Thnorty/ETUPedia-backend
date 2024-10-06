@@ -61,6 +61,7 @@ class GetPostsApiView(APIView):
                 'created_at': created_at,
                 'edited_at': edited_at,
                 'likes': post.likes.count(),
+                'comments': post.postcomment_set.count(),
                 'liked': post.likes.filter(id=request.user.profile.id).exists()
             })
         return JsonResponse(response, safe=False)
@@ -187,6 +188,7 @@ class GetPostInfoApiView(APIView):
             'created_at': created_at,
             'edited_at': edited_at,
             'likes': post.likes.count(),
+            'comments': post.postcomment_set.count(),
             'liked': post.likes.filter(id=request.user.profile.id).exists()
         }
         comments = post.postcomment_set.all().order_by('-created_at')
