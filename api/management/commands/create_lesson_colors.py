@@ -23,5 +23,4 @@ class Command(BaseCommand):
 
 
 def get_random_color():
-    # generate a random color between 16777215 and 14680064
-    return f'#{random.randint(14680064, 16777215):x}'
+    return f'#{random.randint(0, 0xFFFFFF):06x}'
