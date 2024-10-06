@@ -84,7 +84,7 @@ class GetStudentInfoApiView(APIView):
                 'lesson_code': section.lesson_section.lesson_code.lesson_code,
                 'lesson_name': section.lesson_section.lesson_code.name,
                 'lesson_section_number': section.lesson_section.lesson_section_number,
-                'color': section.lesson_section.lesson_code.color,
+                'color': section.lesson_section.color,
                 'classrooms_and_times': classrooms_and_times
             })
         response = {
@@ -147,7 +147,7 @@ class GetTeacherInfoApiView(APIView):
                 'lesson_code': section.lesson_section.lesson_code.lesson_code,
                 'lesson_name': section.lesson_section.lesson_code.name,
                 'lesson_section_number': section.lesson_section.lesson_section_number,
-                'color': section.lesson_section.lesson_code.color,
+                'color': section.lesson_section.color,
                 'classrooms_and_times': classrooms_and_times
             })
         response = {
@@ -224,9 +224,17 @@ class GetSectionsOfLessonApiView(APIView):
         lesson_sections = LessonSection.objects.filter(lesson_code=lesson)
         response = []
         for lesson_section in lesson_sections:
+            lesson_section_classrooms = LessonSectionClassroom.objects.filter(lesson_section=lesson_section)
+            classrooms_and_times = [
+                {'classroom': lsc.classroom_name.name, 'time': lsc.time} for lsc in lesson_section_classrooms
+            ]
             response.append({
-                'section_teacher': lesson_section.lessonsectionteacher_set.first().teacher_name.name,
-                'section_number': lesson_section.lesson_section_number
+                'lesson_code': lesson_section.lesson_code.lesson_code,
+                'lesson_name': lesson_section.lesson_code.name,
+                'lesson_section_teacher': lesson_section.lessonsectionteacher_set.first().teacher_name.name,
+                'lesson_section_number': lesson_section.lesson_section_number,
+                'color': lesson_section.color,
+                'classrooms_and_times': classrooms_and_times
             })
         return JsonResponse(response, safe=False)
 
@@ -242,6 +250,7 @@ class GetLessonSectionsApiView(APIView):
         for lesson_section in lesson_sections:
             response.append({
                 'lesson_section_number': lesson_section.lesson_section_number,
-                'lesson_code': lesson_section.lesson_code.lesson_code
+                'lesson_code': lesson_section.lesson_code.lesson_code,
+                'color': lesson_section.color
             })
         return JsonResponse(response, safe=False)

@@ -21,7 +21,6 @@ class Student(models.Model):
     color = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'student'
 
     def __str__(self):
@@ -32,7 +31,6 @@ class Teacher(models.Model):
     name = models.TextField(primary_key=True, blank=True, null=False)
 
     class Meta:
-        managed = False
         db_table = 'teacher'
 
     def __str__(self):
@@ -43,7 +41,6 @@ class Classroom(models.Model):
     name = models.TextField(primary_key=True, blank=True, null=False)
 
     class Meta:
-        managed = False
         db_table = 'classroom'
 
     def __str__(self):
@@ -56,7 +53,6 @@ class Lesson(models.Model):
     color = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'lesson'
 
     def __str__(self):
@@ -66,9 +62,9 @@ class Lesson(models.Model):
 class LessonSection(models.Model):
     lesson_section_number = models.IntegerField(blank=True, null=True)
     lesson_code = models.ForeignKey(Lesson, models.CASCADE, db_column='lesson_code', blank=True, null=True)
+    color = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'lesson_section'
 
     def __str__(self):
@@ -80,7 +76,6 @@ class LessonSectionStudent(models.Model):
     student = models.ForeignKey('Student', models.CASCADE, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'lesson_section_student'
 
     def __str__(self):
@@ -93,7 +88,6 @@ class LessonSectionTeacher(models.Model):
     teacher_name = models.ForeignKey('Teacher', models.CASCADE, db_column='teacher_name', blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'lesson_section_teacher'
 
     def __str__(self):
@@ -107,7 +101,6 @@ class LessonSectionClassroom(models.Model):
     time = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'lesson_section_classroom'
 
     def __str__(self):
