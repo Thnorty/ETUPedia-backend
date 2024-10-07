@@ -8,6 +8,7 @@ class RequestLoggingMiddleware(MiddlewareMixin):
     @staticmethod
     def process_request(request):
         try:
+            ip_address = request.META.get('HTTP_X_FORWARDED_FOR', None)
             token = request.META.get('HTTP_AUTHORIZATION', None)
             if token:
                 parts = token.split(' ')
@@ -18,7 +19,7 @@ class RequestLoggingMiddleware(MiddlewareMixin):
                 payload = json.loads(payload)
             except json.JSONDecodeError:
                 payload = None
-            log(level='info', token=token, endpoint=end_point, payload=payload)
+            log(level='info', ip_address=ip_address, token=token, endpoint=end_point, payload=payload)
         except Exception as e:
             log(level='error', message=str(e))
         return None

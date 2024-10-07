@@ -145,13 +145,16 @@ LOGGING = {
         'add_severity': {
             '()': 'backend.logging.AddSeverity',
         },
+        'remove_task_name': {
+            '()': 'backend.logging.RemoveTaskName',
+        },
     },
     'formatters': {
         'json': {
             '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
             'json_ensure_ascii': False,
             'json_encoder': None,
-            'format': '%(timestamp)s %(severity)s %(user)s %(endpoint)s %(payload)s %(message)s',
+            'format': '%(timestamp)s %(severity)s %(ip_address)s %(user)s %(endpoint)s %(payload)s %(message)s',
         },
     },
     'handlers': {
@@ -160,7 +163,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': 'audit.log',
             'formatter': 'json',
-            'filters': ['add_timestamp', 'add_severity'],
+            'filters': ['add_timestamp', 'add_severity', 'remove_task_name'],
         },
     },
     'loggers': {
