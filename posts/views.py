@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 import pytz
 
-from backend.logging_utils import log
+from logging_middleware.logging_utils import log
 from posts.models import Post, Topic, PostComment
 
 

@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from backend.logging_utils import log
+from logging_middleware.logging_utils import log
 from api.models import Student, Teacher, Classroom, Lesson, LessonSection, LessonSectionStudent, \
     LessonSectionClassroom, LessonSectionTeacher, Profile
 

@@ -58,7 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'backend.middleware.RequestLoggingMiddleware',
+    'logging_middleware.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -140,13 +140,13 @@ LOGGING = {
     'disable_existing_loggers': True,
     'filters': {
         'add_timestamp': {
-            '()': 'backend.logging.AddTimestamp',
+            '()': 'logging_middleware.modify_logging.AddTimestamp',
         },
         'add_severity': {
-            '()': 'backend.logging.AddSeverity',
+            '()': 'logging_middleware.modify_logging.AddSeverity',
         },
         'remove_task_name': {
-            '()': 'backend.logging.RemoveTaskName',
+            '()': 'logging_middleware.modify_logging.RemoveTaskName',
         },
     },
     'formatters': {

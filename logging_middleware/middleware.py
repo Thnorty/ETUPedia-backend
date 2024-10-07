@@ -1,7 +1,7 @@
 import json
 
 from django.utils.deprecation import MiddlewareMixin
-from backend.logging_utils import log
+from logging_middleware.logging_utils import log
 
 
 class RequestLoggingMiddleware(MiddlewareMixin):
