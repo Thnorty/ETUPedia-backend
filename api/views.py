@@ -1,4 +1,5 @@
 import requests
+from django.db import models
 from django.http import JsonResponse
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 
 from logging_middleware.logging_utils import log
 from api.models import Student, Teacher, Classroom, Lesson, LessonSection, LessonSectionStudent, \
-    LessonSectionClassroom, LessonSectionTeacher, Profile
+    LessonSectionClassroom, LessonSectionTeacher, Profile, TimeEmptyClassroom
 
 
 # Create your views here.
@@ -260,3 +261,18 @@ class GetLessonSectionsApiView(APIView):
                 'color': lesson_section.color
             })
         return JsonResponse(response, safe=False)
+
+
+class GetEmptyClassroomsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        max_time = TimeEmptyClassroom.objects.aggregate(max_time=models.Max('time'))['max_time']
+
+        empty_classrooms = []
+        for time in range(max_time + 1):
+            classrooms = TimeEmptyClassroom.objects.filter(time=time)
+            empty_classrooms.append([classroom.classroom_name.name for classroom in classrooms])
+        return JsonResponse(empty_classrooms, safe=False)
