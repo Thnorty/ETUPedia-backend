@@ -106,3 +106,14 @@ class LessonSectionClassroom(models.Model):
     def __str__(self):
         return (self.lesson_section.lesson_code.lesson_code + " - " + str(self.lesson_section.lesson_section_number) +
                 " - " + self.classroom_name.name + " - " + str(self.time))
+
+
+class TimeEmptyClassroom(models.Model):
+    classroom_name = models.ForeignKey(Classroom, models.CASCADE, db_column='classroom_name', blank=True, null=True)
+    time = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'time_empty_classroom'
+
+    def __str__(self):
+        return self.classroom_name.name + " - " + str(self.time)

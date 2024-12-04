@@ -14,7 +14,7 @@ locale.setlocale(locale.LC_ALL, 'tr_TR.UTF-8')
 
 
 class Command(BaseCommand):
-    help = 'Updates the database with the latest data'
+    help = 'Updates the database with the latest data. Just put the new request_output folder in the root directory.'
 
     def handle(self, *args, **options):
         update_database()
@@ -32,6 +32,7 @@ def update_database():
     cursor.execute('DELETE FROM lesson_section_classroom')
     cursor.execute('DELETE FROM lesson_section_student')
     cursor.execute('DELETE FROM lesson_section_teacher')
+    cursor.execute('DELETE FROM time_empty_classroom')
     cursor.execute('DELETE FROM lesson_section')
     cursor.execute('DELETE FROM lesson')
     cursor.execute('DELETE FROM classroom')
@@ -41,6 +42,7 @@ def update_database():
     cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section_classroom"')
     cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section_student"')
     cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section_teacher"')
+    cursor.execute('DELETE FROM sqlite_sequence WHERE name = "time_empty_classroom"')
     cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson_section"')
     cursor.execute('DELETE FROM sqlite_sequence WHERE name = "lesson"')
     cursor.execute('DELETE FROM sqlite_sequence WHERE name = "classroom"')
@@ -102,14 +104,31 @@ def update_database():
                         s = day['DersKodu'].split(' Şube')
                         lesson_code = s[0]
                         lesson_section_number = s[1]
-                        cursor.execute('INSERT OR IGNORE INTO lesson_section (lesson_section_number, lesson_code) VALUES (?, ?)',
-                                       (lesson_section_number, lesson_code))
-                        cursor.execute('SELECT id FROM lesson_section WHERE lesson_section_number = ? AND lesson_code = ?',
-                                       (lesson_section_number, lesson_code))
+                        cursor.execute(
+                            'INSERT OR IGNORE INTO lesson_section (lesson_section_number, lesson_code) VALUES (?, ?)',
+                            (lesson_section_number, lesson_code))
+                        cursor.execute(
+                            'SELECT id FROM lesson_section WHERE lesson_section_number = ? AND lesson_code = ?',
+                            (lesson_section_number, lesson_code))
                         lesson_section_id = cursor.fetchone()[0]
-                        cursor.execute('INSERT INTO lesson_section_classroom (lesson_section_id, classroom_name, time) VALUES (?, ?, ?)',
-                                       (lesson_section_id, classroom_name, time))
+                        cursor.execute(
+                            'INSERT INTO lesson_section_classroom (lesson_section_id, classroom_name, time) VALUES (?, ?, ?)',
+                            (lesson_section_id, classroom_name, time))
                 hour_time += 1
+
+    # Fill the time_empty_classroom table with classrooms that don't have lessons at time t
+    for time in range(98):
+        cursor.execute(
+            '''INSERT INTO time_empty_classroom (classroom_name, time)
+               SELECT DISTINCT classroom_name, ?
+               FROM lesson_section_classroom
+               WHERE classroom_name NOT IN (
+                   SELECT classroom_name 
+                   FROM lesson_section_classroom
+                   WHERE time = ?
+               )
+               AND classroom_name NOT LIKE 'X%' ''', (time, time)
+        )
 
     print('Processing remaining students...')
     for student_id in all_student_ids:
