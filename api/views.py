@@ -179,7 +179,7 @@ class GetLessonsApiView(APIView):
 
     @staticmethod
     def get(request):
-        lessons = Lesson.objects.all()
+        lessons = Lesson.objects.all().order_by('name')
         response = []
         for lesson in lessons:
             response.append({
