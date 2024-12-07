@@ -114,6 +114,9 @@ class TimeEmptyClassroom(models.Model):
 
     class Meta:
         db_table = 'time_empty_classroom'
+        indexes = [
+            models.Index(fields=['time']),
+        ]
 
     def __str__(self):
         return self.classroom_name.name + " - " + str(self.time)

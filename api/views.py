@@ -1,6 +1,7 @@
 import requests
 from django.db import models
 from django.http import JsonResponse
+from django.core.cache import cache
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
@@ -270,9 +271,32 @@ class GetEmptyClassroomsApiView(APIView):
     @staticmethod
     def post(request):
         max_time = TimeEmptyClassroom.objects.aggregate(max_time=models.Max('time'))['max_time']
+        cache_key = f'empty_classrooms'
 
-        empty_classrooms = []
-        for time in range(max_time + 1):
-            classrooms = TimeEmptyClassroom.objects.filter(time=time)
-            empty_classrooms.append([classroom.classroom_name.name for classroom in classrooms])
+        # Try to get from cache first
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return JsonResponse(cached_result, safe=False)
+
+        # Optimize query with select_related and values_list
+        classrooms_by_time = (
+            TimeEmptyClassroom.objects
+            .select_related('classroom_name')
+            .values_list('time', 'classroom_name__name')
+            .order_by('time')
+        )
+
+        # Process data in memory
+        time_dict = {}
+        for time, name in classrooms_by_time:
+            if time not in time_dict:
+                time_dict[time] = []
+            time_dict[time].append(name)
+
+        # Build final result
+        empty_classrooms = [time_dict.get(time, []) for time in range(max_time + 1)]
+
+        # Cache the result for 5 minutes
+        cache.set(cache_key, empty_classrooms, 1800)
+
         return JsonResponse(empty_classrooms, safe=False)
