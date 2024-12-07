@@ -271,19 +271,13 @@ class GetEmptyClassroomsApiView(APIView):
     @staticmethod
     def post(request):
         max_time = TimeEmptyClassroom.objects.aggregate(max_time=models.Max('time'))['max_time']
-        cache_key = f'empty_classrooms'
-
-        # Try to get from cache first
-        cached_result = cache.get(cache_key)
-        if cached_result:
-            return JsonResponse(cached_result, safe=False)
 
         # Optimize query with select_related and values_list
         classrooms_by_time = (
             TimeEmptyClassroom.objects
             .select_related('classroom_name')
             .values_list('time', 'classroom_name__name')
-            .order_by('time')
+            .order_by('time', 'classroom_name__name')
         )
 
         # Process data in memory
@@ -295,8 +289,5 @@ class GetEmptyClassroomsApiView(APIView):
 
         # Build final result
         empty_classrooms = [time_dict.get(time, []) for time in range(max_time + 1)]
-
-        # Cache the result for 5 minutes
-        cache.set(cache_key, empty_classrooms, 1800)
 
         return JsonResponse(empty_classrooms, safe=False)
