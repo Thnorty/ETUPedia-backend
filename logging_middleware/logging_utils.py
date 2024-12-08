@@ -7,7 +7,7 @@ from api.models import Profile
 logger = logging.getLogger('django')
 
 
-def log(level='info', message=None, ip_address=None, token=None, endpoint=None, payload=None, request=None):
+def log(level='info', message=None, ip_address=None, token=None, endpoint=None, payload=None, request=None, app_version=None):
     request_owner_info = None
 
     if token is not None:
@@ -33,7 +33,8 @@ def log(level='info', message=None, ip_address=None, token=None, endpoint=None, 
         'ip_address': ip_address,
         'user': request_owner_info,
         'endpoint': endpoint,
-        'payload': payload
+        'payload': payload,
+        'app_version': app_version
     }
 
     if level == 'info':
