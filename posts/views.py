@@ -58,6 +58,7 @@ class GetPostsApiView(APIView):
                 'author_name': post.author.student.name + ' ' + post.author.student.surname,
                 'title': post.title,
                 'content': f'{post.content[:100]}...' if len(post.content) > 100 else post.content,
+                'full_content': post.content,
                 'created_at': created_at,
                 'edited_at': edited_at,
                 'likes': post.likes.count(),
