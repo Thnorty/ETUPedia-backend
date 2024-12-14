@@ -27,19 +27,19 @@ ETUPedia is your ultimate companion for navigating university life. Whether you'
 ## Screenshots
 
 ### Main Screen
-![Screenshot 1](.github/screenshots/screenshot_1.jpg)
+<img src=".github/screenshots/screenshot_1.jpg" alt="Main Screen" width="300" />
 
 ### Forum Screen
-![Screenshot 2](.github/screenshots/screenshot_2.jpg)
+<img src=".github/screenshots/screenshot_2.jpg" alt="Forum Screen" width="300" />
 
 ### Teachers Screen
-![Screenshot 3](.github/screenshots/screenshot_3.jpg)
+<img src=".github/screenshots/screenshot_3.jpg" alt="Teachers Screen" width="300" />
 
 ### Lessons Screen
-![Screenshot 4](.github/screenshots/screenshot_4.jpg)
+<img src=".github/screenshots/screenshot_4.jpg" alt="Lessons Screen" width="300" />
 
 ### Empty Classrooms Screen
-![Screenshot 5](.github/screenshots/screenshot_5.jpg)
+<img src=".github/screenshots/screenshot_5.jpg" alt="Empty Classrooms Screen" width="300" />
 
 ### Students Screen
-![Screenshot 6](.github/screenshots/screenshot_6.jpg)
+<img src=".github/screenshots/screenshot_6.jpg" alt="Students Screen" width="300" />
