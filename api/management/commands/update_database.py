@@ -53,7 +53,6 @@ def update_database():
     all_student_ids = {row[0] for row in cursor.fetchall()}
 
     # Insert or update new data
-
     lesson_files = os.listdir(LESSONS_FOLDER_PATH)
 
     print('Processing lesson files...')
@@ -63,20 +62,39 @@ def update_database():
             lesson_file_parts = lesson_file.split(' ')
             lesson_code = lesson_file_parts[0] + ' ' + lesson_file_parts[1]
             lesson_name = ' '.join(lesson_file_parts[2:])[:-5]
+
+            # Check if lesson exists
+            cursor.execute('SELECT color FROM lesson WHERE lesson_code = ?', (lesson_code,))
+            result = cursor.fetchone()
+            if result:
+                lesson_color = result[0]
+            else:
+                lesson_color = random_color()
             cursor.execute('INSERT INTO lesson (lesson_code, name, color) VALUES (?, ?, ?)',
-                           (lesson_code, lesson_name, random_color()))
+                           (lesson_code, lesson_name, lesson_color))
+
             for section in lesson:
-                cursor.execute('INSERT INTO lesson_section (lesson_section_number, lesson_code) VALUES (?, ?)',
-                               (section['SubeNo'], lesson_code))
+                cursor.execute('INSERT INTO lesson_section (lesson_section_number, lesson_code, color) VALUES (?, ?, ?)',
+                               (section['SubeNo'], lesson_code, random_color()))
                 current_lesson_section_id = cursor.lastrowid
                 for student in section['Ogrenci']:
                     student['Ad'] = student['Ad'].title()
                     student['Soyad'] = student['Soyad'].title()
+
+                    # Check if student exists
+                    cursor.execute('SELECT color, mail FROM student WHERE id = ?', (student['OgrenciNo'],))
+                    result = cursor.fetchone()
+                    if result:
+                        student_color, student_mail = result
+                        if "@etu.edu.tr" in student['Mail']:
+                            student_mail = student['Mail']
+                    else:
+                        student_color = random_color()
+                        student_mail = student['Mail']
                     cursor.execute('INSERT OR REPLACE INTO student (id, name, surname, department, mail, year, color) '
                                    'VALUES (?, ?, ?, ?, ?, ?, ?)',
                                    (student['OgrenciNo'], student['Ad'], student['Soyad'], student['ProgramAdi'],
-                                    student['Mail'],
-                                    student['Sinif'], random_color()))
+                                    student_mail, student['Sinif'], student_color))
                     cursor.execute('INSERT INTO lesson_section_student (lesson_section_id, student_id) VALUES (?, ?)',
                                    (current_lesson_section_id, student['OgrenciNo']))
                     all_student_ids.discard(student['OgrenciNo'])
@@ -105,8 +123,8 @@ def update_database():
                         lesson_code = s[0]
                         lesson_section_number = s[1]
                         cursor.execute(
-                            'INSERT OR IGNORE INTO lesson_section (lesson_section_number, lesson_code) VALUES (?, ?)',
-                            (lesson_section_number, lesson_code))
+                            'INSERT OR IGNORE INTO lesson_section (lesson_section_number, lesson_code, color) VALUES (?, ?, ?)',
+                            (lesson_section_number, lesson_code, random_color()))
                         cursor.execute(
                             'SELECT id FROM lesson_section WHERE lesson_section_number = ? AND lesson_code = ?',
                             (lesson_section_number, lesson_code))
