@@ -21,8 +21,15 @@ def log(level='info', message=None, ip_address=None, token=None, endpoint=None, 
             }
         except Token.DoesNotExist:
             request_owner_info = None
-    elif request is not None:
+    elif request is not None and request.auth is not None:
         profile = Profile.objects.get(user=request.auth.user)
+        request_owner_info = {
+            'student_id': profile.student.id,
+            'student_name': profile.student.name,
+            'student_surname': profile.student.surname
+        }
+    elif request is not None and "email" in request.data:
+        profile = Profile.objects.get(student__mail=request.data["email"])
         request_owner_info = {
             'student_id': profile.student.id,
             'student_name': profile.student.name,

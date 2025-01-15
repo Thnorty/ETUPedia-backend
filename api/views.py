@@ -17,17 +17,24 @@ class LoginApiView(APIView):
     @staticmethod
     def post(request):
         email = request.data.get('email')
-        oturum_no = request.data.get('oturumNo')
+        password = request.data.get('password')
 
-        if not email or not oturum_no:
-            log(level='error', message='Missing email or oturumNo', request=request)
+        if not email or not password:
+            log(level='error', message='Missing email or password', request=request)
             return JsonResponse({'error': 'Email and password are required'}, status=400)
 
-        test_url = "https://program.etu.edu.tr/DersProgrami/api/dersprogramplan/bosderslik?dil=tr&oturumNo=" + oturum_no
+        test_url = "https://ubs.etu.edu.tr/login.aspx?lang=tr-TR"
+        data = {
+            "__VIEWSTATE": "/wEPDwUKMjA0MjI1MjgxMg9kFgICAw9kFgwCCw8PFgIeCEltYWdlVXJsBRR+L011c3RlcmlMb2dvLzYxLnBuZ2RkAhcPD2QWAh4MYXV0b2NvbXBsZXRlBQJvbmQCGw8PZBYCHwEFAm9uZAIpDw8WAh4HRW5hYmxlZGhkZAItDxYCHgdWaXNpYmxlaGQCLw9kFgICAQ8PFgIeBFRleHRlZGQYAQUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgIFDUltYWdlQnV0dG9uVFIFDUltYWdlQnV0dG9uRU7yU0RN5/qM2HgMjwGOW22/Ddedug==",
+            "__EVENTVALIDATION": "/wEWBgLL9q6WCwLvqPO+AgLjqJ+WBQKG87HkBgK1qbSRCwKC3IeGDFM9HmiDE8nLvh+veAsKURLDHePN",
+            "txtLogin": email,
+            "txtPassword": password,
+            "btnLogin": "Giriş",
+        }
 
-        response = requests.get(test_url)
-        if response.status_code != 200:
-            log(level='error', message='Invalid email or oturumNo', request=request)
+        response = requests.post(test_url, data=data, allow_redirects=False)
+        if response.status_code != 302:
+            log(level='error', message='Invalid email or password', request=request)
             return JsonResponse({'error': 'Wrong email or password'}, status=400)
 
         try:
