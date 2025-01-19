@@ -4,7 +4,9 @@ import os
 import sqlite3
 from random import random
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, call_command
+
+from api.management.commands import create_student_profiles
 
 DATABASE_NAME = 'db.sqlite3'
 REQUEST_OUTPUT_DIR = 'request_output'
@@ -155,3 +157,5 @@ def update_database():
     conn.commit()
     print('Successfully updated the database!')
     conn.close()
+
+    call_command(create_student_profiles.Command())
