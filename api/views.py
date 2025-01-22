@@ -16,7 +16,7 @@ from api.models import Student, Teacher, Classroom, Lesson, LessonSection, Lesso
 class LoginApiView(APIView):
     @staticmethod
     def post(request):
-        email = request.data.get('email').trim().lower()
+        email = request.data.get('email').strip().lower()
         password = request.data.get('password')
 
         if not email or not password:
