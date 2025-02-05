@@ -1,5 +1,6 @@
 import math
 from datetime import datetime
+from django.db.models.aggregates import Count
 from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
@@ -34,13 +35,13 @@ class GetPostsApiView(APIView):
     @staticmethod
     def post(request):
         sort_by = request.data.get('sort_by')
-        posts = Post.objects.all()
+        posts = Post.objects.annotate(likes_count=Count('likes'))
         if sort_by == 'new':
             posts = posts.order_by('-created_at')
         elif sort_by == 'hot':
             posts = sorted(posts, key=GetPostsApiView.hot_score, reverse=True)
         elif sort_by == 'top':
-            posts = posts.order_by('-likes', '-created_at')
+            posts = posts.order_by('-likes_count', '-created_at')
         else:
             posts = posts.order_by('-created_at')
 

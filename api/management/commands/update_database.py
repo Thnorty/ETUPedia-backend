@@ -84,7 +84,7 @@ def update_database():
                     student['Soyad'] = student['Soyad'].title()
 
                     # Check if student exists
-                    cursor.execute('SELECT color, mail FROM student WHERE id = ?', (student['OgrenciNo'],))
+                    cursor.execute('SELECT color, mail_etu FROM student WHERE id = ?', (student['OgrenciNo'],))
                     result = cursor.fetchone()
                     if result:
                         student_color, student_mail = result

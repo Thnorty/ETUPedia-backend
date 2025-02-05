@@ -26,7 +26,7 @@ class LessonSectionClassroomInline(admin.TabularInline):
 
 class StudentAdmin(admin.ModelAdmin):
     inlines = (LessonSectionStudentInline, )
-    search_fields = ('id', 'name', 'surname', 'department', 'mail', 'year')
+    search_fields = ('id', 'name', 'surname', 'department', 'mail_etu', 'mail_other', 'year')
     ordering = ('name', 'department', 'year')
 
 

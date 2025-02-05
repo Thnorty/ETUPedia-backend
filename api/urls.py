@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     path('login/', views.LoginApiView.as_view(), name='login'),
+    path('id-of-not-found-student/', views.IDOfNotFoundStudentApiView.as_view(), name='id_of_not_found_student'),
+    path('verify-email-of-not-found-student/', views.VerifyEmailOfNotFoundStudentApiView.as_view(), name='verify_email_of_not_found_student'),
 
     path('get-teachers/', views.GetTeachersApiView.as_view(), name='teachers'),
     path('get-teacher-info/', views.GetTeacherInfoApiView.as_view(), name='teacher_info'),

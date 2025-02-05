@@ -16,7 +16,8 @@ class Student(models.Model):
     name = models.TextField(blank=True, null=True)
     surname = models.TextField(blank=True, null=True)
     department = models.TextField(blank=True, null=True)
-    mail = models.TextField(blank=True, null=True)
+    mail_etu = models.TextField(blank=True, null=True)
+    mail_other = models.TextField(blank=True, null=True)
     year = models.IntegerField(blank=True, null=True)
     color = models.TextField(blank=True, null=True)
 

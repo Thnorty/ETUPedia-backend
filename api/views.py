@@ -1,7 +1,6 @@
 import requests
 from django.db import models
 from django.http import JsonResponse
-from django.core.cache import cache
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
@@ -40,7 +39,7 @@ class LoginApiView(APIView):
         try:
             if '@' not in email:
                 email = email + '@etu.edu.tr'
-            student = Student.objects.get(mail=email)
+            student = Student.objects.get(mail_etu=email)
             profile = Profile.objects.get(student=student)
         except Student.DoesNotExist:
             log(level='error', message='Student not found', request=request)
@@ -51,6 +50,46 @@ class LoginApiView(APIView):
 
         token, created = Token.objects.get_or_create(user=profile.user)
         return JsonResponse({'student_id': student.id, 'token': token.key}, status=200)
+
+
+class IDOfNotFoundStudentApiView(APIView):
+    @staticmethod
+    def post(request):
+        student_id = request.data['student_id']
+        try:
+            student = Student.objects.get(id=student_id)
+
+            if student.mail_etu is not None:
+                local_part, domain = student.mail_other.split('@')
+                if len(local_part) <= 3:
+                    masked_local_part = local_part[0] + '*' * (len(local_part) - 1)
+                else:
+                    masked_local_part = local_part[:2] + '*' * (len(local_part) - 3) + local_part[-1]
+                masked_mail = masked_local_part + '@' + domain
+
+                return JsonResponse({'masked_mail': masked_mail}, status=200)
+            else:
+                return JsonResponse({'error': 'Student has no mail'}, status=400)
+        except Student.DoesNotExist:
+            return JsonResponse({'error': 'Student not found'}, status=400)
+
+
+class VerifyEmailOfNotFoundStudentApiView(APIView):
+    @staticmethod
+    def post(request):
+        student_id = request.data['student_id']
+        student_mail_other = request.data['student_mail_other']
+        student_mail_etu = request.data['student_mail_etu']
+        try:
+            student = Student.objects.get(id=student_id)
+            if student.mail_other == student_mail_other:
+                student.mail_etu = student_mail_etu
+                student.save()
+                return JsonResponse({'message': 'Email verified successfully'}, status=200)
+            else:
+                return JsonResponse({'error': 'Email does not match'}, status=400)
+        except Student.DoesNotExist:
+            return JsonResponse({'error': 'Student not found'}, status=400)
 
 
 class GetStudentsApiView(APIView):
@@ -67,7 +106,7 @@ class GetStudentsApiView(APIView):
                 'name': student.name,
                 'surname': student.surname,
                 'department': student.department,
-                'mail': student.mail,
+                'mail': student.mail_etu,
                 'year': student.year,
                 'color': student.color
             })
@@ -101,7 +140,7 @@ class GetStudentInfoApiView(APIView):
             'name': student.name,
             'surname': student.surname,
             'department': student.department,
-            'mail': student.mail,
+            'mail': student.mail_etu,
             'year': student.year,
             'color': student.color,
             'lesson_sections': lesson_sections

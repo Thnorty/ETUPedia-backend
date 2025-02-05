@@ -17,7 +17,8 @@ def log(level='info', message=None, ip_address=None, token=None, endpoint=None, 
             request_owner_info = {
                 'student_id': profile.student.id,
                 'student_name': profile.student.name,
-                'student_surname': profile.student.surname
+                'student_surname': profile.student.surname,
+                'student_mail': profile.student.mail_etu if profile.student.mail_etu is not None else profile.student.mail_other,
             }
         except Token.DoesNotExist:
             request_owner_info = None
@@ -26,15 +27,25 @@ def log(level='info', message=None, ip_address=None, token=None, endpoint=None, 
         request_owner_info = {
             'student_id': profile.student.id,
             'student_name': profile.student.name,
-            'student_surname': profile.student.surname
+            'student_surname': profile.student.surname,
+            'student_mail': profile.student.mail_etu if profile.student.mail_etu is not None else profile.student.mail_other,
         }
     elif request is not None and "email" in request.data:
-        profile = Profile.objects.get(student__mail=request.data["email"])
-        request_owner_info = {
-            'student_id': profile.student.id,
-            'student_name': profile.student.name,
-            'student_surname': profile.student.surname
-        }
+        try:
+            profile = Profile.objects.get(student__mail_etu=request.data["email"])
+            request_owner_info = {
+                'student_id': profile.student.id,
+                'student_name': profile.student.name,
+                'student_surname': profile.student.surname,
+                'student_mail': profile.student.mail_etu if profile.student.mail_etu is not None else profile.student.mail_other,
+            }
+        except Profile.DoesNotExist:
+            request_owner_info = {
+                'student_id': None,
+                'student_name': None,
+                'student_surname': None,
+                'student_mail': request.data["email"],
+            }
 
     extra = {
         'ip_address': ip_address,
