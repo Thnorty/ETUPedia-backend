@@ -15,6 +15,8 @@ urlpatterns = [
 
     path('get-students/', views.GetStudentsApiView.as_view(), name='students'),
     path('get-student-info/', views.GetStudentInfoApiView.as_view(), name='student_info'),
+    path('favorite-student/', views.FavoriteStudentApiView.as_view(), name='favorite_student'),
+    path('remove-favorite-student/', views.RemoveFavoriteStudentApiView.as_view(), name='remove_favorite_student'),
 
     path('change-profile-color/', views.ChangeProfileColorApiView.as_view(), name='change_profile_color'),
 

@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         students = Student.objects.all()
         for student in tqdm(students, desc="Processing students"):
-            if student.mail_etu is not None and not student.mail_etu.endswith("@etu.edu.tr"):
+            if (student.mail_etu is not None and student.mail_etu != '') and (not student.mail_etu.endswith("@etu.edu.tr")):
                 student.mail_other = student.mail_etu
                 student.mail_etu = None
                 student.save()

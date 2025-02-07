@@ -20,6 +20,7 @@ class Student(models.Model):
     mail_other = models.TextField(blank=True, null=True)
     year = models.IntegerField(blank=True, null=True)
     color = models.TextField(blank=True, null=True)
+    favorites = models.ManyToManyField('Student', symmetrical=False, blank=True)
 
     class Meta:
         db_table = 'student'

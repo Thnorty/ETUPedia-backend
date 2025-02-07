@@ -55,11 +55,11 @@ class LoginApiView(APIView):
 class IDOfNotFoundStudentApiView(APIView):
     @staticmethod
     def post(request):
-        student_id = request.data['student_id']
+        student_id = request.data['student_id'].strip()
         try:
             student = Student.objects.get(id=student_id)
 
-            if student.mail_etu is not None:
+            if student.mail_other is not None and student.mail_other != '':
                 local_part, domain = student.mail_other.split('@')
                 if len(local_part) <= 3:
                     masked_local_part = local_part[0] + '*' * (len(local_part) - 1)
@@ -77,9 +77,9 @@ class IDOfNotFoundStudentApiView(APIView):
 class VerifyEmailOfNotFoundStudentApiView(APIView):
     @staticmethod
     def post(request):
-        student_id = request.data['student_id']
-        student_mail_other = request.data['student_mail_other']
-        student_mail_etu = request.data['student_mail_etu']
+        student_id = request.data['student_id'].strip()
+        student_mail_other = request.data['student_mail_other'].strip().lower()
+        student_mail_etu = request.data['student_mail_etu'].strip().lower()
         try:
             student = Student.objects.get(id=student_id)
             if student.mail_other == student_mail_other:
@@ -112,6 +112,54 @@ class GetStudentsApiView(APIView):
             })
         return JsonResponse(response, safe=False)
 
+    @staticmethod
+    def post(request):
+        is_favorites = request.data.get('is_favorites', False)
+        if is_favorites:
+            student = request.user.profile.student
+            students = student.favorites.all().order_by('name', 'surname')
+        else:
+            students = Student.objects.all().order_by('name', 'surname')
+
+        response = []
+        for student in students:
+            response.append({
+                'id': student.id,
+                'name': student.name,
+                'surname': student.surname,
+                'department': student.department,
+                'mail': student.mail_etu,
+                'year': student.year,
+                'color': student.color
+            })
+        return JsonResponse(response, safe=False)
+
+
+class FavoriteStudentApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        student_id = request.data['student_id']
+        student = Student.objects.get(id=student_id)
+        request.user.profile.student.favorites.add(student)
+        if request.user.profile.student in student.favorites.all():
+            student.favorites.remove(request.user.profile.student)
+        return JsonResponse({'message': 'Student added to favorites successfully'}, status=200)
+
+
+class RemoveFavoriteStudentApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        student_id = request.data['student_id']
+        student = Student.objects.get(id=student_id)
+        request.user.profile.student.favorites.remove(student)
+        return JsonResponse({'message': 'Student removed from favorites successfully'}, status=200)
+
 
 class GetStudentInfoApiView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -135,6 +183,7 @@ class GetStudentInfoApiView(APIView):
                 'color': section.lesson_section.color,
                 'classrooms_and_times': classrooms_and_times
             })
+        is_favorite = student in request.user.profile.student.favorites.all()
         response = {
             'id': student.id,
             'name': student.name,
@@ -143,7 +192,8 @@ class GetStudentInfoApiView(APIView):
             'mail': student.mail_etu,
             'year': student.year,
             'color': student.color,
-            'lesson_sections': lesson_sections
+            'lesson_sections': lesson_sections,
+            'is_favorite': is_favorite,
         }
         return JsonResponse(response, safe=False)
 
