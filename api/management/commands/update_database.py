@@ -84,19 +84,26 @@ def update_database():
                     student['Soyad'] = student['Soyad'].title()
 
                     # Check if student exists
-                    cursor.execute('SELECT color, mail_etu FROM student WHERE id = ?', (student['OgrenciNo'],))
+                    cursor.execute('SELECT color, mail_etu, mail_other FROM student WHERE id = ?', (student['OgrenciNo'],))
                     result = cursor.fetchone()
                     if result:
-                        student_color, student_mail = result
+                        student_color, student_mail_etu, student_mail_other = result
                         if "@etu.edu.tr" in student['Mail']:
-                            student_mail = student['Mail']
+                            student_mail_etu = student['Mail']
+                        else:
+                            student_mail_other = student['Mail']
                     else:
                         student_color = random_color()
-                        student_mail = student['Mail']
-                    cursor.execute('INSERT OR REPLACE INTO student (id, name, surname, department, mail, year, color) '
-                                   'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        if "@etu.edu.tr" in student['Mail']:
+                            student_mail_etu = student['Mail']
+                            student_mail_other = None
+                        else:
+                            student_mail_etu = None
+                            student_mail_other = student['Mail']
+                    cursor.execute('INSERT OR REPLACE INTO student (id, name, surname, department, mail_etu, mail_other, year, color) '
+                                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                                    (student['OgrenciNo'], student['Ad'], student['Soyad'], student['ProgramAdi'],
-                                    student_mail, student['Sinif'], student_color))
+                                    student_mail_etu, student_mail_other, student['Sinif'], student_color))
                     cursor.execute('INSERT INTO lesson_section_student (lesson_section_id, student_id) VALUES (?, ?)',
                                    (current_lesson_section_id, student['OgrenciNo']))
                     all_student_ids.discard(student['OgrenciNo'])
