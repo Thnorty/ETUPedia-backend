@@ -7,7 +7,7 @@ from api.models import Profile
 
 logger = logging.getLogger('django')
 
-FIXED_SALT = b'$2b$12$KIX5xH5zQ4f5xH5zQ4f5xH'
+FIXED_SALT = b'$2b$12$Q3ETT03uWBzVcrK1rGX4Vu'
 
 def log(level='info', message=None, ip_address=None, token=None, endpoint=None, payload=None, request=None, app_version=None):
     request_owner_info = None
