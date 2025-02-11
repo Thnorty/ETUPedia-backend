@@ -1,11 +1,13 @@
 import logging
 
+import bcrypt
 from rest_framework.authtoken.models import Token
 
 from api.models import Profile
 
 logger = logging.getLogger('django')
 
+FIXED_SALT = b'$2b$12$KIX5xH5zQ4f5xH5zQ4f5xH'
 
 def log(level='info', message=None, ip_address=None, token=None, endpoint=None, payload=None, request=None, app_version=None):
     request_owner_info = None
@@ -46,6 +48,9 @@ def log(level='info', message=None, ip_address=None, token=None, endpoint=None, 
                 'student_surname': None,
                 'student_mail': request.data["email"],
             }
+
+    if payload and 'password' in payload:
+        payload['password'] = bcrypt.hashpw(payload['password'].encode('utf-8'), FIXED_SALT).decode('utf-8')
 
     extra = {
         'ip_address': ip_address,

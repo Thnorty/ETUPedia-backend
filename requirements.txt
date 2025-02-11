@@ -12,3 +12,4 @@ sqlparse==0.5.1
 urllib3==2.2.3
 python-json-logger==2.0.7
 tqdm
+bcrypt
