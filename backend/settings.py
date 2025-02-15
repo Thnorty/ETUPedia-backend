@@ -31,7 +31,7 @@ CORS_ALLOW_HEADERS = ['*']
 
 ALLOWED_HOSTS = ['localhost', '.hasantuna.com']
 
-CSRF_TRUSTED_ORIGINS = ['http://etupedia.hasantuna.com']
+CSRF_TRUSTED_ORIGINS = ['https://etupedia.hasantuna.com']
 
 # Application definition
 
