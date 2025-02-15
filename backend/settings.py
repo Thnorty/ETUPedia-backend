@@ -29,9 +29,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_HEADERS = ['*']
 
-ALLOWED_HOSTS = ['.ngrok-free.app', 'localhost']
+ALLOWED_HOSTS = ['localhost', '.hasantuna.com']
 
-CSRF_TRUSTED_ORIGINS = ['https://bass-flexible-freely.ngrok-free.app', 'https://flexible-rabbit-jolly.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['http://etupedia.hasantuna.com']
 
 # Application definition
 
